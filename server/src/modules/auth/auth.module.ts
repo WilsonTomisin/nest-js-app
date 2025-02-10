@@ -19,8 +19,8 @@ import { JwtStrategy } from "./strategies/jwt.strategy";
             imports:[ConfigModule],
             inject:[ConfigService],
             useFactory: async (configService:ConfigService)=>{
-                const jwtsecret = configService.get<string>("JWT_SECRET")
-                console.log(jwtsecret)
+                // const jwtsecret = configService.get<string>("JWT_SECRET")
+                // console.log(jwtsecret)
                 return{
                 secret:configService.get<string>("JWT_SECRET"),
                 signOptions:{
