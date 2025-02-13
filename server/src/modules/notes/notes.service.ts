@@ -10,11 +10,16 @@ import { UpdateNoteDto } from "./dto/update-note.dto";
 export class NotesService{
     constructor( @InjectModel(Note.name) private readonly noteModel:Model<Note>){}
 
-    async makeNote(user:User, createNoteDto:CreateNoteDto):Promise<Note>{
+    async allUsersNotes(){
+        return this.noteModel.find()
+    }
+
+
+    async makeMyNote(user:User, createNoteDto:CreateNoteDto):Promise<Note>{
         return this.noteModel.create({...createNoteDto, created_by: user.id}) 
     }
 
-    async allNotes(user:User):Promise<Note[]>{
+    async allMyNotes(user:User):Promise<Note[]>{
         const allUserNotes = await  this.noteModel.find({created_by: user.id})
         // return "you are now viewing notes!"
         if (!allUserNotes) {
@@ -23,14 +28,14 @@ export class NotesService{
         return allUserNotes
     }
 
-    async getNote(noteId:string, user:User):Promise<Note | null>{
+    async getMyNote(noteId:string, user:User):Promise<Note | null>{
         const foundNote = await this.noteModel.findOne({_id: noteId, created_by:user.id})
         if (!foundNote) {
             throw new NotFoundException("Could not find the note.")
         }
         return foundNote
     }
-    async changeNote(user:User, noteId:string, updatedNoteDto:UpdateNoteDto):Promise<Note|null>{
+    async changeMyNote(user:User, noteId:string, updatedNoteDto:UpdateNoteDto):Promise<Note|null>{
         const updatedNote = await this.noteModel.findOneAndUpdate(
         {
             _id:noteId,
@@ -47,7 +52,7 @@ export class NotesService{
 
         return updatedNote
     }
-    async removeNote(noteId:string, user:User){
+    async removeMyNote(noteId:string, user:User){
         const myNote  = await this.noteModel.findOneAndDelete({_id:noteId,created_by:user.id})
         if (!myNote) {
             throw new NotFoundException("Could not find note and delete")

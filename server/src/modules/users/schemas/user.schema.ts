@@ -32,6 +32,11 @@ export class User extends Document{
         }
     })
     password:string
+
+    @Prop({enum:['Admin','Creator','Viewer'], default:"Creator"})
+    role:string
+
+
 }
 export const UserSchema = SchemaFactory.createForClass(User)
 UserSchema.index({email:1}, {unique:true}) // for better performance. it creates a reference for each email soo it is easier and faster to find.

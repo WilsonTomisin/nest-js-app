@@ -6,6 +6,8 @@ import { CreateUserDto } from "./dto/create-user.dto";
 import { UpdateUserDto } from "./dto/update-user.dto";
 import * as bcrypt from 'bcrypt';
 
+type AvailableRoles = "Admin" | "Creator" | "Viewer"
+
 @Injectable()
 export class UserService{
     constructor(@InjectModel(User.name) private userModel:Model<User>){}
@@ -18,7 +20,27 @@ export class UserService{
         const foundUser = await this.userModel.findOne({email}).select("+password")
         return foundUser
     }
-    async create(createUserDto:CreateUserDto):Promise<User>{
+
+    async createAdmin(createUserDto:CreateUserDto):Promise<User>{
+        const {password, email} = createUserDto
+
+        const existingAdmin = await this.userModel.findOne({email})
+
+        if (existingAdmin) {
+            throw new ConflictException("User already exists")
+        }
+        const hashedPassword = await bcrypt.hash(password,10)
+        const configureAdmin = {...createUserDto, role:"Admin", password:hashedPassword }
+        const newAdmin =  await this.userModel.create(configureAdmin)
+        return newAdmin.save()
+    }
+
+    async updateRole(id:string, newRole:AvailableRoles):Promise<User | null>{
+        const updated =  await this.userModel.findByIdAndUpdate(id, { role:newRole}, {new:true}).exec()
+        return updated
+
+    }
+    async createEditor(createUserDto:CreateUserDto):Promise<User>{
         const {password, email} = createUserDto
 
         const existingUser = await this.userModel.findOne({email})
@@ -27,7 +49,7 @@ export class UserService{
             throw new ConflictException("User already exists")
         }
         const hashedPassword = await bcrypt.hash(password,10)
-        const configureUser = {...createUserDto, password:hashedPassword }
+        const configureUser = {...createUserDto, role:"Creator", password:hashedPassword }
         const newUser =  await this.userModel.create(configureUser)
         return newUser.save()
     }

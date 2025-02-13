@@ -15,10 +15,9 @@ export class AuthService{
     // checks if user credentials are correct 
     async validateUser(loginDto:LoginDto):Promise<any>{
         const user = await this.userService.findByEmail(loginDto.email)
-
+        
         if (user &&(await bcrypt.compare(loginDto.password, user.password))) {
             const {password, ...data} = user.toObject()
-            console.log(data)
             return data
         }
         throw new UnauthorizedException("Invalid details")
@@ -31,7 +30,8 @@ export class AuthService{
             accessToken: this.jwtService.sign({
                 id: user._id,
                 email:user.email,
-                fullName: user.fullName
+                fullName: user.fullName,
+                role:user.role
             })
         }
     }

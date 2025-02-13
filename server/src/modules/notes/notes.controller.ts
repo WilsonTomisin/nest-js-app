@@ -4,32 +4,46 @@ import { JwtAuthGuard } from "../auth/guards/jwt-auth.guard";
 import { CreateNoteDto } from "./dto/create-note.dto";
 import { User } from "../users/schemas/user.schema";
 import { UpdateNoteDto } from "./dto/update-note.dto";
+import { RolesGuard } from "../auth/guards/roles.guard";
+import { Roles } from "../auth/guards/role.decorator";
 
+
+
+@Controller("notes")
 
 @UseGuards(JwtAuthGuard)
-@Controller("notes")
 export class NotesController{
     constructor(private readonly notesService:NotesService){}
+
+    //ADMIN ROUTES
+    @UseGuards(RolesGuard)
+    @Roles("Admin")
+    @Get('admin')
+    async findAllNotes(){
+        return ' now viewing all notes'
+        // return this.notesService.allUsersNotes()
+    }
+
+
     @Get()
-    async findAll(@Req() req){
-        return this.notesService.allNotes(req.user as User)
+    async findMyNotes(@Req() req){
+        return this.notesService.allMyNotes(req.user as User)
     }
     @Get(":id")
-    async findNote(@Param("id") noteId:string, @Req() req){
-        return this.notesService.getNote(noteId, req.user as User)
+    async findMyNote(@Param("id") noteId:string, @Req() req){
+        return this.notesService.getMyNote(noteId, req.user as User)
     }
     @Post()
-    async createNote(@Req() req, @Body() createNoteDto:CreateNoteDto){
-        // console.log(req.user)
-        return this.notesService.makeNote(req.user as User , createNoteDto)   
+    async createMyNote(@Req() req, @Body() createNoteDto:CreateNoteDto){
+        return this.notesService.makeMyNote(req.user as User , createNoteDto)   
     }
     @Patch(":id")
-    async updateNote(@Req() req , @Param("id") noteId:string, @Body() updateNoteDto:UpdateNoteDto){
-        return this.notesService.changeNote(req.user as User, noteId, updateNoteDto)
+    async updateMyNote(@Req() req , @Param("id") noteId:string, @Body() updateNoteDto:UpdateNoteDto){
+        return this.notesService.changeMyNote(req.user as User, noteId, updateNoteDto)
     }
     @Delete(":id")
-    async deleteNote(@Param("id") noteId:string, @Req() req){
-        return this.notesService.removeNote(noteId, req.user as User)
+    async deleteMyNote(@Param("id") noteId:string, @Req() req){
+        return this.notesService.removeMyNote(noteId, req.user as User)
     }
 
 }

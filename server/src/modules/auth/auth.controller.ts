@@ -14,7 +14,11 @@ export class AuthController{
 
     @Post("register")
     async register(@Body() registerDto:RegisterDto){
-        return this.userService.create(registerDto)
+        return this.userService.createEditor(registerDto)
+    }
+    @Post("register/admin")
+    async registerAdmin(@Body() registerDto:RegisterDto){
+        return this.userService.createAdmin(registerDto)
     }
 
     @Post("login")

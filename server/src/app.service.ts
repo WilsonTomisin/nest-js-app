@@ -14,3 +14,8 @@ export class AppService {
 //   "email":"johnjames@gmail.com",
 //   "password":"johnjames1"
 // }
+// {
+//   "fullName":"Admin 1",
+//   "email":"admin@gmail.com",
+//   "password":"adminpassword"
+// }

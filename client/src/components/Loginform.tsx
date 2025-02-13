@@ -1,9 +1,11 @@
-import {useState} from 'react'
+import React, {useState} from 'react'
 import { Link } from 'react-router-dom'
 import { Label } from './ui/label'
 import { Input } from './ui/input'
 import { getServer } from '../utils/getServer'
-import { AxiosError } from 'axios'
+import { AxiosError } from 'axios';
+import { toast, ToastContainer } from 'react-toastify';
+import "react-toastify/dist/ReactToastify.css";
 
 
 interface FormErrors{
@@ -27,7 +29,7 @@ const Loginform = () => {
         }))
 
     }
-    const handleSubmit = async(e:React.FormEvent<HTMLFormElement>):Promise<void>=>{
+    const handleLogin = async(e:React.FormEvent<HTMLFormElement>):Promise<void>=>{
         e.preventDefault();
         setisLoading(true)
         try {
@@ -39,17 +41,28 @@ const Loginform = () => {
             const data = await response.data
             setisLoading(false)
             console.log(data)
+            toast.success("Successfully authorized ✔",{
+                position:"bottom-left"
+            })
+    
         } catch (error) {
-            const errorMsg = error instanceof AxiosError ? error.response?.data.error.message : 'An error occured'
+            const errorMsg = error instanceof AxiosError ? error.response?.data.message : 'An error occured'
             setErrors((prev)=>({...prev, serverErr: errorMsg}))
+            toast.error(errorMsg,{
+                position:"bottom-left"
+            })
             console.log(errorMsg)
             setisLoading(false)
         }
 
     }
+  
+       
+    
+
 
   return (
-    <form onSubmit={handleSubmit} className=' w-1/2 mx-auto'>
+    <form onSubmit={handleLogin} className=' w-1/2 mx-auto'>
         <div className=' mb-7'>
             <Label htmlFor='email' className=' block mb-2'>Email</Label>
             <Input name='email' value={myFormData.email} type='email' placeholder='e.g joe@gmail.com' onChange={handleChange} className=' rounded-lg'/>
@@ -64,15 +77,15 @@ const Loginform = () => {
                 Sign up
             </Link>
         </div>
-        <span className=' text-red-500 text-2xl my-4'>{errors.serverErr}</span>
         <button 
         type='submit' 
         disabled={isLoading}
         className={` w-full px-7 py-2 rounded-2xl border border-transparent 
-        transition-all ease-in-out duration-500 text-white bg-black hover:bg-white
-        hover:text-black hover:border-black`}>
+        transition-all ease-in-out duration-500  text-white bg-black hover:bg-white
+        hover:text-black hover:border-black disabled:border-transparent disabled:bg-gray-200 disabled:cursor-not-allowed`}>
             { !isLoading ? "Login" :"logging in..."}
         </button>
+        <ToastContainer/>
     </form>
   )
 }
