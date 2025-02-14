@@ -10,18 +10,18 @@ import { Roles } from "../auth/guards/role.decorator";
 
 
 @Controller("notes")
-
+@UseGuards(RolesGuard)
 @UseGuards(JwtAuthGuard)
+
 export class NotesController{
     constructor(private readonly notesService:NotesService){}
 
     //ADMIN ROUTES
-    @UseGuards(RolesGuard)
     @Roles("Admin")
     @Get('admin')
     async findAllNotes(){
-        return ' now viewing all notes'
-        // return this.notesService.allUsersNotes()
+        // return ' now viewing all notes'
+        return this.notesService.allUsersNotes()
     }
 
 
@@ -44,6 +44,12 @@ export class NotesController{
     @Delete(":id")
     async deleteMyNote(@Param("id") noteId:string, @Req() req){
         return this.notesService.removeMyNote(noteId, req.user as User)
+    }
+
+    @Roles("Admin")
+    @Delete()
+    async deleteAllNotes(){
+        return this.notesService.removeAllNotes()
     }
 
 }

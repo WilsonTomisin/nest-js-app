@@ -21,6 +21,7 @@ export class UserService{
         return foundUser
     }
 
+
     async createAdmin(createUserDto:CreateUserDto):Promise<User>{
         const {password, email} = createUserDto
 
@@ -64,5 +65,9 @@ export class UserService{
     }
     async remove(id:string):Promise<User|null>{
         return this.userModel.findByIdAndDelete(id).exec()
+    }
+
+    async removeAllUsers(){
+        return this.userModel.deleteMany({role:undefined})
     }
 }

@@ -14,7 +14,6 @@ export class NotesService{
         return this.noteModel.find()
     }
 
-
     async makeMyNote(user:User, createNoteDto:CreateNoteDto):Promise<Note>{
         return this.noteModel.create({...createNoteDto, created_by: user.id}) 
     }
@@ -61,4 +60,9 @@ export class NotesService{
             message:"Note succesfully deleted"
         }
     }
+
+    async removeAllNotes(){
+        return await this.noteModel.deleteMany({}).exec()
+    }
+
 }
