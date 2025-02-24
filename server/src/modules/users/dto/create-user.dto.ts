@@ -1,6 +1,7 @@
 import { MinLength,IsNotEmpty, IsEmail, IsOptional } from "class-validator";
+import { Document } from "mongoose";
 
-export class CreateUserDto{
+export class CreateUserDto {
     @IsNotEmpty()
     fullName:string;
 
@@ -8,8 +9,9 @@ export class CreateUserDto{
     email:string;
 
     @MinLength(9)
+    @IsOptional()
     password:string;
 
     @IsOptional()
-    role: string
+    role: "Admin" | "Creator" | "Viewer" ;
 }

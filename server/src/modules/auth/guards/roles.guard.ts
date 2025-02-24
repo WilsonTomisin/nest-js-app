@@ -1,4 +1,4 @@
-import { CanActivate,Injectable,ExecutionContext } from "@nestjs/common";
+import { CanActivate,Injectable,ExecutionContext, UnauthorizedException } from "@nestjs/common";
 import { Reflector } from "@nestjs/core";
 import { JwtService } from "@nestjs/jwt";
 import { Request } from "express";
@@ -19,13 +19,13 @@ export class RolesGuard implements CanActivate{
 
             const token = request.headers.authorization?.split(" ")[1]
             if(!token) return false 
-
+            
             try {
                 const parsedUser = await this.jwtService.verify(token, { secret: this.configService.get<string>("JWT_SECRET")})
                 const userRole = parsedUser.role;
                 return requiredRole.includes(userRole)
             } catch (error) {
-                return false
+                throw new UnauthorizedException("Only admins can access this route") 
             }
         }
 }

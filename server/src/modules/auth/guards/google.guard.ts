@@ -4,4 +4,4 @@ import { Request } from "express";
 
 
 @Injectable()
-export class JwtAuthGuard extends AuthGuard("jwt"){}
+export class GoogleGuard extends AuthGuard("google"){}

@@ -1,4 +1,4 @@
-import { ConflictException, Injectable } from "@nestjs/common";
+import { BadRequestException, ConflictException, ForbiddenException, Injectable, NotFoundException, UnauthorizedException } from "@nestjs/common";
 import { InjectModel } from "@nestjs/mongoose";
 import { Model } from "mongoose";
 import { User } from "./schemas/user.schema";
@@ -13,8 +13,9 @@ export class UserService{
     constructor(@InjectModel(User.name) private userModel:Model<User>){}
 
     async findAll():Promise<User[]>{
-        const allUsers = await this.userModel.find()
-        return allUsers
+            const allUsers = await this.userModel.find()
+            return allUsers
+        
     }
     async findByEmail(email:string):Promise<User | null>{
         const foundUser = await this.userModel.findOne({email}).select("+password")
@@ -23,24 +24,24 @@ export class UserService{
 
 
     async createAdmin(createUserDto:CreateUserDto):Promise<User>{
-        const {password, email} = createUserDto
+        const {password , email} = createUserDto
 
         const existingAdmin = await this.userModel.findOne({email})
 
         if (existingAdmin) {
             throw new ConflictException("User already exists")
         }
-        const hashedPassword = await bcrypt.hash(password,10)
-        const configureAdmin = {...createUserDto, role:"Admin", password:hashedPassword }
-        const newAdmin =  await this.userModel.create(configureAdmin)
-        return newAdmin.save()
+        try {
+            const hashedPassword = await bcrypt.hash(password,10)
+            const configureAdmin = {...createUserDto, role:"Admin", password:hashedPassword }
+            const newAdmin =  await this.userModel.create(configureAdmin)
+            return newAdmin.save()
+        } catch (error) {
+            throw new ForbiddenException("Could not create an admin")
+        }
+       
     }
 
-    async updateRole(id:string, newRole:AvailableRoles):Promise<User | null>{
-        const updated =  await this.userModel.findByIdAndUpdate(id, { role:newRole}, {new:true}).exec()
-        return updated
-
-    }
     async createEditor(createUserDto:CreateUserDto):Promise<User>{
         const {password, email} = createUserDto
 
@@ -48,26 +49,59 @@ export class UserService{
 
         if (existingUser) {
             throw new ConflictException("User already exists")
+            
         }
-        const hashedPassword = await bcrypt.hash(password,10)
-        const configureUser = {...createUserDto, role:"Creator", password:hashedPassword }
-        const newUser =  await this.userModel.create(configureUser)
-        return newUser.save()
+        try {
+            const hashedPassword = await bcrypt.hash(password,10)
+            const configureUser = {...createUserDto, role:"Creator", password:hashedPassword }
+            const newUser =  await this.userModel.create(configureUser)
+            return newUser.save()
+        } catch (error) {
+            throw new ForbiddenException("Could not create user")
+        }
     }
+    async updateRole(id:string, newRole:AvailableRoles):Promise<User | null>{
+        const updated =  await this.userModel.findByIdAndUpdate(id, { role:newRole}, {new:true}).exec()
+        return updated
+
+    }
+    
 
     async findById( id:string):Promise<User | null>{
-        const user = await this.userModel.findById(id).exec()
-        return user
+        try {
+            const user = await this.userModel.findById(id).exec()
+            if (!user) {
+                throw new NotFoundException('user does not exist')
+            }
+            return user
+        } catch (error) {
+            // this block handles error that pertains to the ID format
+            throw new NotFoundException("could not find user.")
+        }
+       
     }
     async update(id:string, updateUserDto:UpdateUserDto):Promise<User | null >{
-        const updatedUser = await this.userModel.findByIdAndUpdate(id, updateUserDto, {new:true}).exec()
-        return updatedUser
+        try {
+            const updatedUser = await this.userModel.findByIdAndUpdate(id, updateUserDto, {new:true}).exec()
+            return updatedUser
+        } catch (error) {
+            throw new BadRequestException("Could not update user")
+        }
+        
     }
-    async remove(id:string):Promise<User|null>{
-        return this.userModel.findByIdAndDelete(id).exec()
+    async remove(id:string):Promise<any>{
+        const removedUser = await this.userModel.findByIdAndDelete(id).exec()
+
+        return{
+            message:`${removedUser?._id} has been removed `
+        } 
     }
 
     async removeAllUsers(){
-        return this.userModel.deleteMany({role:undefined})
+         const removedUsers = await this.userModel.deleteMany({role:undefined})
+
+        return {
+            message:`${removedUsers.deletedCount} users have been removed`
+        }
     }
 }

@@ -1,4 +1,5 @@
 import { IsNotEmpty, IsEmail ,MinLength, IsOptional } from "class-validator";
+import { Document } from "mongoose";
 
 export class RegisterDto{
     @IsNotEmpty()
@@ -13,5 +14,5 @@ export class RegisterDto{
     password:string;
 
     @IsOptional()
-    role:string;
+    role:"Admin" | "Creator" | "Viewer"
 }

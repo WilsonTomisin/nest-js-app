@@ -25,7 +25,7 @@ export class User extends Document{
     email:string
 
     @Prop({
-        required:true,
+        required:false,
         select:false,
         validate:{
             validator: (password:string) => password.length > 9
