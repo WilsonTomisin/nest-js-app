@@ -60,13 +60,15 @@ export class AuthService{
     async login(user:User){
         // console.log('JWT Secret:', process.env.JWT_SECRET);
         return {
-            accessToken: this.jwtService.sign({
-                id: user._id,
-                email:user.email,
-                fullName: user.fullName,
-                role:user.role
-            }),
-            user
+            data:{
+                accessToken: this.jwtService.sign({
+                    id: user._id,
+                    email:user.email,
+                    fullName: user.fullName,
+                    role:user.role
+                }),
+                user
+            }
         }
     }
 

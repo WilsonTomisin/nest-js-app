@@ -26,7 +26,7 @@ export class AuthController{
     @UseGuards(GoogleGuard)
     async redirectGoogle( @Req() req){
         return {
-            user: req.user
+            data: req.user
         }
     }
 
